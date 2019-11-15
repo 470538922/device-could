@@ -70,7 +70,7 @@
         <el-button
           type="primary"
           plain
-          disabled="true"
+          disabled=true
           style="width:38%;height:40px;padding:0;"
           v-if="sendMsgDisabled"
         >{{time+'秒后获取'}}
@@ -619,8 +619,8 @@
           this
         ).then(
           result => {
-            // console.log(result.data.data[0]);
-            this.deal = result.data.data[0]
+            console.log(result.data.data);
+            this.deal = result.data.data!=[]?result.data.data[0]:{content:""}
           },
           ({type, info}) => {
           }
@@ -727,7 +727,7 @@
         ).then(
           result => {
             if (result.data.code === 200) {
-              // console.log(result.data);
+              console.log(result.data);
               localStorage.token = result.data.data.tokenStr;
               localStorage.user = JSON.stringify(result.data.data);
               localStorage.permissionUrl = JSON.stringify(result.data.data.permissionUrl);

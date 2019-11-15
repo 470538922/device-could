@@ -165,7 +165,6 @@ export default {
       } else if (params.type === "edit") {
         this.ids = ","+params.rowData.id;
         this.notread=params.rowData.isRead===0?1:0
-        debugger
         this.dtwarning();
       } else if (params.type === "stop") {
         alert(`ID：${params.rowData["id"]} 姓名：${params.rowData["name"]}`);
