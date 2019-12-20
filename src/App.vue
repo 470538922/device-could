@@ -3,7 +3,7 @@
     <el-container v-if="token" class="mainWrapper">
       <el-aside class="siderWrapper">
         <div class="logoWrap">
-          <img src="./assets/image/logo.png">
+          <img src="./assets/image/logo.png" />
         </div>
         <el-menu
           :router="true"
@@ -13,8 +13,13 @@
           active-text-color="#ffd04b"
           :collapse="isCollapse"
         >
-          <el-submenu :index="item.permissionCode" v-if="item.subMenu.length!==1" :key="item.route" v-for="item in menuSource">
-            <template slot="title" >
+          <el-submenu
+            :index="item.permissionCode"
+            v-if="item.subMenu.length!==1"
+            :key="item.route"
+            v-for="item in menuSource"
+          >
+            <template slot="title">
               <i class="iconfont" v-html="item.icon"></i>
               <span slot="title">{{item.menu}}</span>
             </template>
@@ -24,14 +29,17 @@
               v-for="subItem in item.subMenu"
             >{{subItem.menu}}</el-menu-item>
           </el-submenu>
-          <el-menu-item class='singleMenuItem' v-else :index="item.subMenu[0].route"><i class="iconfont" v-html="item.icon"></i><span slot="title">{{item.menu}}</span></el-menu-item>
+          <el-menu-item class="singleMenuItem" v-else :index="item.subMenu[0].route">
+            <i class="iconfont" v-html="item.icon"></i>
+            <span slot="title">{{item.menu}}</span>
+          </el-menu-item>
         </el-menu>
         <div v-on:click="TroggleHandle" class="isCollapse-group">
           <i v-show="isCollapse === true" class="el-icon-arrow-right"></i>
           <i v-show="isCollapse === false" class="el-icon-arrow-left"></i>
         </div>
       </el-aside>
-      <el-container >
+      <el-container>
         <el-header>
           <el-header style="background-color:#efefef;">
             <div class="breadcrumbWrap">
@@ -68,7 +76,7 @@
         </el-header>
         <el-main class="mainContentWrapper" style="padding:8px;">
           <transition>
-            <router-view v-if="isRouterAlive"/>
+            <router-view v-if="isRouterAlive" />
           </transition>
         </el-main>
         <el-footer>长虹智能终端设备生产管理云平台({{version?(new Date(version).format("yyyy/MM/dd hh:mm:ss")):'no version'}})</el-footer>
@@ -76,7 +84,7 @@
     </el-container>
     <el-container v-else>
       <transition>
-        <router-view v-if="isRouterAlive"/>
+        <router-view v-if="isRouterAlive" />
       </transition>
     </el-container>
   </div>
@@ -188,7 +196,9 @@ export default {
       }
     },
     initPermission() {
-      this.user = JSON.parse(localStorage.getItem("user"))&&JSON.parse(localStorage.getItem("user")).name;
+      this.user =
+        JSON.parse(localStorage.getItem("user")) &&
+        JSON.parse(localStorage.getItem("user")).name;
       this.token = localStorage.getItem("token");
       this.permissionUrl = JSON.parse(
         localStorage.getItem("permissionUrl") || "[]"
@@ -222,15 +232,17 @@ export default {
   watch: {
     $route() {
       this.token = localStorage.getItem("token");
-      this.user = JSON.parse(localStorage.getItem("user"))&&JSON.parse(localStorage.getItem("user")).name;
+      this.user =
+        JSON.parse(localStorage.getItem("user")) &&
+        JSON.parse(localStorage.getItem("user")).name;
       this.permissionUrl = JSON.parse(
         localStorage.getItem("permissionUrl") || "[]"
       );
-      this.MsgCount()
+      if (localStorage.getItem("token") != null) {
+        this.MsgCount();
+      }
     },
-    permissionUrl(){
-
-    },
+    permissionUrl() {},
     token(val) {
       if (val) {
         this.initPermission();
@@ -241,7 +253,7 @@ export default {
   },
   computed: {},
   created() {
-    if(localStorage.getItem("token")){
+    if (localStorage.getItem("token")) {
       this.initPermission();
     }
     //setInterval(this.MsgCount,1000)

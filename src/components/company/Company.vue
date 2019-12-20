@@ -308,7 +308,7 @@ export default {
     details(rowIndex, rowData, column) {
       this.dialogVisible = true;
       this.detailsValue = rowData;
-      // console.log(rowData);
+      console.log(rowData);
       this.innerVisibleImg=rowData.businessLicenseImg
     },
     // selectGroupChange(selection) {

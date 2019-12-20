@@ -1,31 +1,16 @@
 <template>
   <div>
     <el-row class="warp">
-      <el-col
-        :span="24"
-        class="warp-breadcrum"
-      >
-        <el-button
-          type="primary"
-          @click="onSubmit"
-          size="small"
-        ><i
-            style='font-size:12px'
-            class='iconfont'
-          >&#xe645;</i>&nbsp;保存</el-button>
+      <el-col :span="24" class="warp-breadcrum">
+        <el-button type="primary" @click="onSubmit" size="small">
+          <i style="font-size:12px" class="iconfont">&#xe645;</i>&nbsp;保存
+        </el-button>
       </el-col>
       <!--
 Form 组件提供了表单验证的功能，只需要通过 rule 属性传入约定的验证规则，并 Form-Item 的 prop 属性设置为需校验的字段名即可。具体可以参考官网：http://element.eleme.io/#/zh-CN/component/form
--->
-      <el-col
-        :span="24"
-        class="warp-main"
-      >
-        <el-form
-          ref="infoForm"
-          :model="infoForm"
-          :rules="rules"
-        >
+      -->
+      <el-col :span="24" class="warp-main">
+        <el-form ref="infoForm" :model="infoForm" :rules="rules">
           <el-form-item>
             <div class="edit_container">
               <quill-editor
@@ -35,8 +20,7 @@ Form 组件提供了表单验证的功能，只需要通过 rule 属性传入约
                 class="editer"
                 :options="infoForm.editorOption"
                 @ready="onEditorReady($event)"
-              >
-              </quill-editor>
+              ></quill-editor>
             </div>
           </el-form-item>
         </el-form>
@@ -116,15 +100,16 @@ export default {
         this
       ).then(
         result => {
-          console.log(result.data.data);
-          this.infoForm.a_content=result.data.data[0].content
+          if (result.data.data.length > 0) {
+            this.infoForm.a_content = result.data.data[0].content;
+          }
         },
         ({ type, info }) => {}
       );
     }
   },
-  created () {
-     this.findLinkMan()
+  created() {
+    this.findLinkMan();
   },
   components: {
     //使用编辑器

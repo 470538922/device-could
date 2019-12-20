@@ -1,6 +1,6 @@
 <script>
 const apiSrc = "http://117.78.4.95:8015";
-const imgPath = "http://117.78.4.95:8020/";
+const imgPath = "http://117.78.4.95:8025/";
 const apiImg = "http://117.78.4.95:8019/upload";
 
 // const apiSrc = "http://118.25.217.48:9880";

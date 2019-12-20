@@ -7,10 +7,7 @@
           <h5>个人信息</h5>
           <div class="case">
             <div class="photo">
-              <img
-                src="../../assets/image/pic.png"
-                alt=""
-              >
+              <img src="../../assets/image/pic.png" alt />
             </div>
             <div class="message">
               <p>{{userMsg.name}}</p>
@@ -18,40 +15,25 @@
               <p>TEL：{{userMsg.phone}}</p>
             </div>
           </div>
-          <span
-            class="jurisdiction"
-            @click="dialogVisible=true"
-          ><i
-              class="iconfont"
-              style="color:blue"
-            >&#xe670;</i>&nbsp;我的权限</span>
+          <span class="jurisdiction" @click="dialogVisible=true">
+            <i class="iconfont" style="color:blue">&#xe670;</i>&nbsp;我的权限
+          </span>
         </div>
-        <el-dialog
-          :title="myPower"
-          :visible.sync="dialogVisible"
-          width="700px"
-        >
+        <el-dialog :title="myPower" :visible.sync="dialogVisible" width="700px">
           <div style="height:300px;width:100%;overflow:scroll;">
             <ul class="role_style">
-              <li
-                v-for="(item,index) in role.permissionInfo "
-                :key="index"
-              >
-                <span class="role-parent">{{item.module}}</span>：<span class="role-child">{{item.permissionItem}}</span>
+              <li v-for="(item,index) in role.permissionInfo " :key="index">
+                <span class="role-parent">{{item.module}}</span>：
+                <span class="role-child">{{item.permissionItem}}</span>
               </li>
             </ul>
           </div>
-
         </el-dialog>
 
         <div class="equipment-data">
           <div class="top">
             <h5>设备数据</h5>
-            <i
-              style='font-size:14px'
-              class='iconfont'
-              @click="reload"
-            >&#xe614;</i>
+            <i style="font-size:14px" class="iconfont" @click="reload">&#xe614;</i>
           </div>
           <ul class="case">
             <li title="设备总数">
@@ -62,7 +44,7 @@
             <li title="正常运行">
               <p style="color:#67c23a" v-if="deviceData.normal>0">{{deviceData.normal}}</p>
               <p style="color:#dde2eb" v-else>0</p>
-              
+
               <p>正常运行</p>
             </li>
             <li title="设备故障">
@@ -96,43 +78,43 @@
           >{{item}}
           </li>
         </ul>
-      </div> -->
+      </div>-->
       <div class="device-operation-Status">
         <div class="left">
           <h5>设备运行状态</h5>
           <div class="state">
-            <el-form label-position='top'>
+            <el-form label-position="top">
               <el-form-item label="正常运行">
                 <el-progress
-                  :percentage="deviceData.normalPer"
+                  :percentage="deviceData.normalPer!=null?deviceData.normalPer:0"
                   :stroke-width="10"
                   color="#67c23a"
                 ></el-progress>
               </el-form-item>
               <el-form-item label="故障待处理">
                 <el-progress
-                  :percentage="deviceData.faultPer"
+                  :percentage="deviceData.faultPer!=null?deviceData.faultPer:0"
                   :stroke-width="10"
                   color="#f56c6c"
                 ></el-progress>
               </el-form-item>
               <el-form-item label="维修中">
                 <el-progress
-                  :percentage="deviceData.maintenancePer"
+                  :percentage="deviceData.maintenancePer!=null?deviceData.maintenancePer:0"
                   :stroke-width="10"
                   color="#e6a23c"
                 ></el-progress>
               </el-form-item>
               <el-form-item label="关机中">
                 <el-progress
-                  :percentage="deviceData.showdownPer"
+                  :percentage="deviceData.showdownPer!=null?deviceData.showdownPer:0"
                   :stroke-width="10"
                   color="#939393"
                 ></el-progress>
               </el-form-item>
               <el-form-item label="未连接">
                 <el-progress
-                  :percentage="deviceData.unlinePer"
+                  :percentage="deviceData.unlinePer!=null?deviceData.unlinePer:0"
                   :stroke-width="10"
                   color="#D7D7D7"
                 ></el-progress>
@@ -145,10 +127,7 @@
           <ul>
             <li>
               <span>
-                <i
-                  class="iconfont2 icon-tubiao-zhuzhuangtu"
-                  style="color: #409eff;"
-                ></i>
+                <i class="iconfont2 icon-tubiao-zhuzhuangtu" style="color: #409eff;"></i>
               </span>
               <div>
                 <p>总数</p>
@@ -157,45 +136,36 @@
             </li>
             <li>
               <span>
-                <i
-                  class="iconfont2 icon-dengpao"
-                  style="color:#e6a23c ;"
-                ></i>
+                <i class="iconfont2 icon-dengpao" style="color:#e6a23c ;"></i>
               </span>
               <div>
                 <p>预警</p>
-                <p style="font-size:20px;font-weight:600;" v-if="deviceData.warn>0">{{deviceData.warn}}</p>
-                 <p style="color:#dde2eb;font-size:20px;font-weight:600;" v-else>0</p>
+                <p
+                  style="font-size:20px;font-weight:600;"
+                  v-if="deviceData.warn>0"
+                >{{deviceData.warn}}</p>
+                <p style="color:#dde2eb;font-size:20px;font-weight:600;" v-else>0</p>
               </div>
             </li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="right ">
+    <div class="right">
       <div class="backlog">
         <h5>待办事项</h5>
         <ul>
-          <li
-            title="故障工单"
-            @click="$router.push('/Breakdown')"
-          >
+          <li title="故障工单" @click="$router.push('/Breakdown')">
             <span>故障工单</span>
             <span v-if="worksList.fault>0">{{worksList.fault}}</span>
             <span style="color:#dde2eb" v-else>0</span>
           </li>
-          <li
-            title="检修工单"
-            @click="$router.push('/TurnaroundPlans')"
-          >
+          <li title="检修工单" @click="$router.push('/TurnaroundPlans')">
             <span>检修工单</span>
             <span v-if="worksList.overhaul>0">{{worksList.overhaul}}</span>
             <span style="color:#dde2eb" v-else>0</span>
           </li>
-          <li
-            title="保养工单"
-            @click="$router.push('/Upkeep')"
-          >
+          <li title="保养工单" @click="$router.push('/Upkeep')">
             <span>保养工单</span>
             <span v-if="worksList.maintain>0">{{worksList.maintain}}</span>
             <span style="color:#dde2eb" v-else>0</span>
@@ -208,11 +178,12 @@
           <span @click="$router.push('/Message')">更多</span>
         </div>
         <ul class="message-details">
-          <li
-            v-for="(item, index) in massgageData"
-            :key="index"
-            @click="$router.push('/Message')"
-          ><span :title="item.msgTitle">{{item.msgTitle}}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{item.msgContent}}</span></li>
+          <li v-for="(item, index) in massgageData" :key="index" @click="$router.push('/Message')">
+            <span :title="item.msgTitle">{{item.msgTitle}}</span>
+            <span
+              style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+            >{{item.msgContent}}</span>
+          </li>
         </ul>
       </div>
       <div class="frequent-contacts">
@@ -242,7 +213,7 @@
             <span>桌面维护：</span>
             <span>12580</span>
           </li>
-        </ul> -->
+        </ul>-->
         <div v-html="a_content"></div>
       </div>
     </div>
@@ -273,12 +244,12 @@ export default {
         maintenancePer: 0,
         AllDevice: 0,
         fault: 0,
-        normal: 0,
+        normal: 0
       },
       //消息
       massgageData: [],
-      a_content:'',
-      myPower:''
+      a_content: "",
+      myPower: ""
     };
   },
   methods: {
@@ -456,7 +427,9 @@ export default {
         this
       ).then(
         result => {
-          this.a_content=result.data.data[0].content
+          if (result.data.data.length > 0) {
+            this.a_content = result.data.data[0].content;
+          }
         },
         ({ type, info }) => {}
       );
@@ -470,7 +443,7 @@ export default {
     this.allNotReadMsg();
     this.getRoleAndPermissionInfo();
     this.findLinkMan();
-    this.myPower=`我的权限（${this.userMsg.roleName}）`
+    this.myPower = `我的权限（${this.userMsg.roleName}）`;
   },
   watch: {}
 };
@@ -787,9 +760,9 @@ export default {
       overflow: scroll;
       div {
         margin-top: 10px;
-        padding-left:5px;
-        line-height: 20px; 
-        
+        padding-left: 5px;
+        line-height: 20px;
+
         // li {
         //   list-style-type: none;
         //   height: 20px;
