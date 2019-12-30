@@ -5,7 +5,9 @@
       <div class="classifylist">
         <div class="classify">
           <ul>
-            <h5><i class='iconfont' style="font-weight:normal">&#xe659;</i>&nbsp;所有分类</h5>
+            <h5>
+              <i class="iconfont" style="font-weight:normal">&#xe659;</i>&nbsp;所有分类
+            </h5>
             <li @click="leftcontro(1,'','')">├生产设备</li>
             <li @click="leftcontro(2,'','')">├非生产设备</li>
             <li @click="leftcontro(3,'','')">├辅助生产设备</li>
@@ -14,7 +16,9 @@
           </ul>
         </div>
         <div class="category">
-          <h5><i class='iconfont' style="font-weight:normal">&#xe659;</i>&nbsp;所有类别</h5>
+          <h5>
+            <i class="iconfont" style="font-weight:normal">&#xe659;</i>&nbsp;所有类别
+          </h5>
           <el-tree
             :data="organiza"
             default-expand-all
@@ -23,34 +27,21 @@
             :expand-on-click-node="false"
             style="max-height:300px;overflow:scroll"
           >
-            <span
-              class="custom-tree-node"
-              slot-scope="{ node, data }"
-            >
+            <span class="custom-tree-node" slot-scope="{ node, data }">
               <span class="listcontent">{{ data.categoryName}}</span>
             </span>
           </el-tree>
         </div>
         <div class="tone">
-          <h5><i class='iconfont' style="font-weight:normal">&#xe659;</i>&nbsp;设备状况</h5>
+          <h5>
+            <i class="iconfont" style="font-weight:normal">&#xe659;</i>&nbsp;设备状况
+          </h5>
           <ul>
             <li @click="leftcontro('','','1')">├在用</li>
-            <li
-              style="color:#FF990E"
-              @click="leftcontro('','','2')"
-            >├出租</li>
-            <li
-              style="color:#00990C"
-              @click="leftcontro('','','3')"
-            >├停用</li>
-            <li
-              style="color:#0C99FD"
-              @click="leftcontro('','','4')"
-            >├封存</li>
-            <li
-              style="color:#993202"
-              @click="leftcontro('','','5')"
-            >├报废</li>
+            <li style="color:#FF990E" @click="leftcontro('','','2')">├出租</li>
+            <li style="color:#00990C" @click="leftcontro('','','3')">├停用</li>
+            <li style="color:#0C99FD" @click="leftcontro('','','4')">├封存</li>
+            <li style="color:#993202" @click="leftcontro('','','5')">├报废</li>
           </ul>
         </div>
       </div>
@@ -58,21 +49,24 @@
     <div class="content" :class="[{hide:isHideList}]">
       <div class="search">
         <permission-button
-          permCode='device_add_lookup.device_add_save'
-          banType='hide'
+          permCode="device_add_lookup.device_add_save"
+          banType="hide"
           size="small"
           type="primary"
           @click="toAdd"
-        ><i style='font-size:12px' class='iconfont'>&#xe62f;</i>&nbsp; 添加
+        >
+          <i style="font-size:12px" class="iconfont">&#xe62f;</i>&nbsp; 添加
         </permission-button>
-        <el-button size="small" type="primary" @click="reload()"><i class='el-icon-refresh'></i> 立即刷新</el-button>
+        <el-button size="small" type="primary" @click="reload()">
+          <i class="el-icon-refresh"></i> 立即刷新
+        </el-button>
         <!-- <el-button
           size="small"
           type="primary"
           @click="editShow"
           disabled
         >修改
-        </el-button> -->
+        </el-button>-->
         <!--<el-button size="small" > 复制</el-button>-->
         <div class="searchright">
           <span>关键字：</span>
@@ -83,17 +77,10 @@
             v-model="keyWord"
             style="width:200px"
           ></el-input>
-          <el-button
-            size="small"
-            type="primary"
-            @click="beforefindByKeyWord"
-          ><i class='el-icon-search'></i> 搜索
+          <el-button size="small" type="primary" @click="beforefindByKeyWord">
+            <i class="el-icon-search"></i> 搜索
           </el-button>
-          <span
-            style="color:#409eff;font-size:12px;cursor: pointer;"
-            @click="adsearch"
-          >高级搜索</span>
-
+          <span style="color:#409eff;font-size:12px;cursor: pointer;" @click="adsearch">高级搜索</span>
         </div>
       </div>
       <div class="tablelist">
@@ -101,7 +88,7 @@
           <v-table
             is-vertical-resize
             is-horizontal-resize
-            :vertical-resize-offset='100'
+            :vertical-resize-offset="100"
             column-width-drag
             :multiple-sort="false"
             style="width:100%;"
@@ -116,10 +103,7 @@
             @on-custom-comp="customCompFunc"
             :show-vertical-border="false"
           ></v-table>
-          <div
-            class="mt20 mb20 bold"
-            style="text-align:left;margin-top:20px"
-          >
+          <div class="mt20 mb20 bold" style="text-align:left;margin-top:20px">
             <v-pagination
               @page-change="pageChange"
               @page-size-change="pageSizeChange"
@@ -133,11 +117,7 @@
       </div>
     </div>
 
-    <advanced
-      class="adsearch"
-      v-on:isHide="isHide"
-      v-on:advanceValue="advanceValue"
-    ></advanced>
+    <advanced class="adsearch" v-on:isHide="isHide" v-on:advanceValue="advanceValue"></advanced>
   </div>
 </template>
 <script>
@@ -148,9 +128,7 @@ export default {
   name: "equipment",
   data() {
     return {
-      isHideList: this.$route.params.id !== undefined
-        ? true
-        : false,
+      isHideList: this.$route.params.id !== undefined ? true : false,
       organiza: [],
       totalnum: 0,
       defaultProps: "",
@@ -196,20 +174,19 @@ export default {
           columnAlign: "left",
           isResize: true,
           overflowTitle: true,
-          formatter: function (rowData, rowIndex, pagingIndex, field) {
+          formatter: function(rowData, rowIndex, pagingIndex, field) {
             if (rowData.deviceState === 1) {
-              return `<span >在用</span>`
-            }else if(rowData.deviceState === 2){
-              return `<span style="color:#FF990E">出租</span>`
-            }else if(rowData.deviceState === 3){
-              return `<span style="color:#00990C">停用</span>`
-            }else if(rowData.deviceState === 4){
-              return `<span style="color:#0C99FD">封存</span>`
-            }else if(rowData.deviceState === 5){
-              return `<span style="color:#993202">报废</span>`
+              return `<span >在用</span>`;
+            } else if (rowData.deviceState === 2) {
+              return `<span style="color:#FF990E">出租</span>`;
+            } else if (rowData.deviceState === 3) {
+              return `<span style="color:#00990C">停用</span>`;
+            } else if (rowData.deviceState === 4) {
+              return `<span style="color:#0C99FD">封存</span>`;
+            } else if (rowData.deviceState === 5) {
+              return `<span style="color:#993202">报废</span>`;
             }
-
-          },
+          }
         },
         {
           field: "organizeName",
@@ -221,7 +198,7 @@ export default {
           overflowTitle: true
         },
         {
-          field: "location",
+          field: "positionName",
           title: "安装位置",
           width: 70,
           titleAlign: "left",
@@ -296,7 +273,7 @@ export default {
         this.warningdelete();
         this.$delete(this.tableData, params.index);
       } else if (params.type === "edit") {
-        this.$router.push({path:"Equipment/Redact/" + params.rowData.id});
+        this.$router.push({ path: "Equipment/Redact/" + params.rowData.id });
       } else if (params.type === "audit") {
         alert(`ID：${params.rowData["id"]} 姓名：${params.rowData["name"]}`);
       }
@@ -325,18 +302,18 @@ export default {
       $(".adsearch")[0].style.right = params;
     },
     toAdd() {
-      this.$router.push({path:"Equipment/EquipmentAdd"});
+      this.$router.push({ path: "Equipment/EquipmentAdd" });
     },
     editShow() {
       if (this.edbt.length == 1) {
-        this.$router.push({path:"Equipment/Redact/" + this.edbt[0].id});
+        this.$router.push({ path: "Equipment/Redact/" + this.edbt[0].id });
         this.$store.commit("equipmentRedact", this.edbt);
       } else {
         this.$message("只能选择选择一行数据!!!");
       }
     },
     redactShow(rowIndex, rowData, column) {
-      this.$router.push({path:"Equipment/Redact/" + rowData.id});
+      this.$router.push({ path: "Equipment/Redact/" + rowData.id });
       this.$store.commit("equipmentRedact", rowData);
     },
     selectGroupChange(selection) {
@@ -360,8 +337,7 @@ export default {
         }
       }
     },
-    selectChange(selection, rowData) {
-    },
+    selectChange(selection, rowData) {},
     getTableData() {
       this.tableData = this.tableDate.slice(
         (this.pageIndex - 1) * this.pageSize,
@@ -424,8 +400,8 @@ export default {
             deviceSates: this.deviceSates
           },
           option: {
-            enableMsg:true,
-            successMsg:'设备信息加载完成~',
+            enableMsg: true,
+            successMsg: "设备信息加载完成~"
           },
           type: "get",
           url: "/device/select"
@@ -459,8 +435,8 @@ export default {
           },
           type: "get",
           url: "/device/findByKeyWord",
-          option:{
-            successMsg:'设备信息加载完成~',
+          option: {
+            successMsg: "设备信息加载完成~"
           }
         },
         this
@@ -472,8 +448,8 @@ export default {
         ({ type, info }) => {}
       );
     },
-    beforefindByKeyWord(){
-      this.pageIndex=1;
+    beforefindByKeyWord() {
+      this.pageIndex = 1;
       this.findByKeyWord();
     },
     edelete() {
@@ -528,13 +504,12 @@ export default {
           url: "/deviceCategory/all"
         },
         this
-      )
-        .then(
-          result => {
-            this.organiza = this.filterArray(result.data.data, 0);
-          },
-          ({ type, info }) => {}
-        );
+      ).then(
+        result => {
+          this.organiza = this.filterArray(result.data.data, 0);
+        },
+        ({ type, info }) => {}
+      );
     },
     warningdelete() {
       this.$confirm("确定要删除吗?", "提示", {
@@ -559,7 +534,7 @@ export default {
         this.leftclass = a;
         this.leftcate = null;
         this.leftstate = null;
-      }else{
+      } else {
         this.leftclass = null;
         this.leftcate = null;
         this.leftstate = c;
@@ -579,33 +554,37 @@ export default {
           },
           type: "get",
           url: "/device/select",
-          option:{
-            successMsg:'设备信息加载完成~',
+          option: {
+            successMsg: "设备信息加载完成~"
           }
         },
         this
-      )
-        .then(
-          result => {
-            this.totalnum = result.data.data.totalElements;
-            this.tableData = result.data.data.content;
-          },
-          ({ type, info }) => {}
-        );
+      ).then(
+        result => {
+          this.totalnum = result.data.data.totalElements;
+          this.tableData = result.data.data.content;
+        },
+        ({ type, info }) => {}
+      );
     }
   },
   mounted() {
-    $('.classifylist li').click(function (e) {
-      $(this).toggleClass("active-color").siblings().removeClass("active-color")
+    $(".classifylist li").click(function(e) {
+      $(this)
+        .toggleClass("active-color")
+        .siblings()
+        .removeClass("active-color");
     });
   },
   created() {
     this.findall();
     //this.findDeviceState();
     this.findAlldeviceClassify();
-    let a=this.$route.matched.find(item=>(item.name==="EquipmentAdd"))?true:false;
-    let b=this.$route.params.id !== undefined ? true : false;
-    this.isHideList = a||b ?true:false;
+    let a = this.$route.matched.find(item => item.name === "EquipmentAdd")
+      ? true
+      : false;
+    let b = this.$route.params.id !== undefined ? true : false;
+    this.isHideList = a || b ? true : false;
   },
   components: {
     advanced
@@ -613,12 +592,14 @@ export default {
   watch: {
     $route() {
       //debugger
-      let a=this.$route.matched.find(item=>(item.name==="EquipmentAdd"))?true:false;
-      let b=this.$route.params.id !== undefined ? true : false;
-      this.isHideList = a||b ?true:false;
+      let a = this.$route.matched.find(item => item.name === "EquipmentAdd")
+        ? true
+        : false;
+      let b = this.$route.params.id !== undefined ? true : false;
+      this.isHideList = a || b ? true : false;
       this.$refs.equipmentTable.resize();
     }
-  },
+  }
 };
 Vue.component("table-equipment", {
   template: `<span>
@@ -688,7 +669,7 @@ Vue.component("table-equipment", {
       border: 1px solid @Info;
       padding: 10px;
       border-radius: 5px;
-      .category{
+      .category {
         border: none;
       }
       h5 {
@@ -758,7 +739,7 @@ Vue.component("table-equipment", {
   right: -310px;
   transition: all 0.3s ease-in;
 }
-.active-color{
+.active-color {
   background-color: #f5f7fa;
 }
 </style>

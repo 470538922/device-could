@@ -1,12 +1,18 @@
 <template>
   <div class="ammeter_add">
-    <el-form :model="electricMeterDTO" label-width="110px" ref="ammeterAdd">
+    <el-form :model="electricMeterDTO" label-width="110px" ref="ammeterEdit">
       <el-form-item
         label="电表编码："
         prop="no"
         :rules="[{ required: true, message: '请输入电表编码', trigger: 'blur' }]"
       >
-        <el-input size="small" v-model="electricMeterDTO.no" style="width:300px;" maxlength="20"></el-input>
+        <el-input
+          size="small"
+          disabled
+          v-model="electricMeterDTO.no"
+          style="width:300px;"
+          maxlength="20"
+        ></el-input>
       </el-form-item>
       <el-form-item
         label="电表名称："
@@ -66,6 +72,9 @@
 </template>
 <script>
 export default {
+  props: {
+    id: { default: null }
+  },
   data() {
     return {
       value: "",
@@ -80,12 +89,12 @@ export default {
     };
   },
   methods: {
-    getCode() {
+    findOne() {
       this.Axios(
         {
-          url: "/meter/getNo",
+          url: "/meter/get",
           type: "get",
-          params: {},
+          params: { meterId: this.id },
           option: {
             requestTarget: "p",
             enableMsg: false
@@ -96,17 +105,17 @@ export default {
         .then(result => {
           if (result.data.code === 200) {
             console.log(result);
-            this.electricMeterDTO.no = result.data.data;
+            this.electricMeterDTO = result.data.data;
           }
         })
         .catch(err => {});
     },
     save() {
-      this.$refs["ammeterAdd"].validate(valid => {
+      this.$refs["ammeterEdit"].validate(valid => {
         if (valid) {
           this.Axios(
             {
-              url: "/meter/add",
+              url: "/meter/update",
               type: "post",
               params: this.electricMeterDTO,
               option: {
@@ -130,7 +139,7 @@ export default {
     }
   },
   created() {
-    this.getCode();
+    this.findOne();
   }
 };
 </script>

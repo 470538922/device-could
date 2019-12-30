@@ -60,6 +60,9 @@ import binding from '@/components/smartMeters/basics/binding/index'
 import gateway from '@/components/smartMeters/basics/gateway/index'
 import ammeter from '@/components/smartMeters/basics/ammeter/index'
 import region from '@/components/smartMeters/basics/region/index'
+import EnergyDetails from '@/components/smartMeters/Energy/EnergyDetails'
+import efficiency from '@/components/smartMeters/oee/index'
+import efficiencyDetails from '@/components/smartMeters/oee/efficiencyDetails'
 
 Vue.use(Router)
 
@@ -77,6 +80,39 @@ const router = new Router({
     component: Login,
     meta: {
       requireAuth: false,
+    },
+  },
+  {
+    path: '/efficiencyDetails',
+    name: 'efficiencyDetails',
+    component: efficiencyDetails,
+    props: {
+      pageName: '明细分析'
+    },
+    meta: {
+      requireAuth: true
+    },
+  },
+  {
+    path: '/efficiency',
+    name: 'efficiency',
+    component: efficiency,
+    props: {
+      pageName: '总览'
+    },
+    meta: {
+      requireAuth: true
+    },
+  },
+  {
+    path: '/EnergyDetails',
+    name: 'EnergyDetails',
+    component: EnergyDetails,
+    props: {
+      pageName: '明细分析'
+    },
+    meta: {
+      requireAuth: true
     },
   },
   {
@@ -128,7 +164,7 @@ const router = new Router({
     name: 'generalSituation',
     component: generalSituation,
     props: {
-      pageName: '概况'
+      pageName: '总览'
     },
     meta: {
       requireAuth: true

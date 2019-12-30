@@ -8,7 +8,9 @@
         :disabled="multipleSelection.length!=1"
         @click="editVisible=true"
       >修改</el-button>
-      <el-button ripple size="small" type>导入</el-button>
+      <el-tooltip class="item" effect="light" content="正在开发中..." placement="top-start">
+        <el-button ripple size="small" type>导入</el-button>
+      </el-tooltip>
       <el-button ripple size="small" :disabled="multipleSelection.length!=1" @click="open">删除</el-button>
       <div class="search">
         关键字：
@@ -43,7 +45,7 @@
         <el-table-column prop="gmtCreate" label="添加日期" min-width="120" show-overflow-tooltip></el-table-column>
         <el-table-column prop="remark" label="备注" min-width="220" show-overflow-tooltip></el-table-column>
       </el-table>
-      <div style="padding:8px 0;">
+      <div style="padding:8px 0;text-align:right;">
         <el-pagination
           background
           @size-change="handleSizeChange"
@@ -96,6 +98,7 @@
 import add from "./add";
 import edit from "./edit";
 export default {
+  inject: ["reload"],
   data() {
     return {
       editVisible: false,
@@ -153,11 +156,13 @@ export default {
     },
     addDialog(pamars) {
       this.addVisible = false;
-      this.getList();
+      // this.getList();
+      this.reload();
     },
     editDialog(pamars) {
       this.editVisible = false;
-      this.getList();
+      // this.getList();
+      this.reload();
     },
     handleSizeChange(val) {
       this.pageSize = val;

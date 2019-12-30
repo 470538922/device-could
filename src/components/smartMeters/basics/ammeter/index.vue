@@ -2,9 +2,17 @@
   <div class="ammeter_list">
     <div class="top">
       <permission-button permCode banType="hide" size="small" ripple @click="addVisible=true">新增</permission-button>
-      <el-button ripple size="small" type>修改</el-button>
-      <el-button ripple size="small" type>导入</el-button>
-      <el-button ripple size="small" type>删除</el-button>
+      <el-button
+        ripple
+        size="small"
+        type
+        :disabled="multipleSelection.length!=1"
+        @click="editVisible=true"
+      >修改</el-button>
+      <el-tooltip class="item" effect="light" content="正在开发中..." placement="top-start">
+        <el-button ripple size="small" type>导入</el-button>
+      </el-tooltip>
+      <el-button ripple size="small" :disabled="multipleSelection.length!=1" type @click="open">删除</el-button>
       <div class="search">
         关键字：
         <el-input type="search" placeholder="根据设备编号、名称、位号" size="small" v-model="keyword"></el-input>
@@ -21,15 +29,15 @@
         :height="500"
       >
         <el-table-column align="center" type="selection" width="50"></el-table-column>
-        <el-table-column prop="date" label="电表编码" min-width="160" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="no" label="电表编码" min-width="160" show-overflow-tooltip></el-table-column>
         <el-table-column prop="name" label="电表名称" min-width="200" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="address" label="型号" min-width="180" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="date" label="通信协议" min-width="100" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="name" label="电表地址" min-width="120" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="address" label="添加日期" min-width="120" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="address" label="备注" min-width="220" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="meterType" label="型号" min-width="180" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="commProto" label="通信协议" min-width="100" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="meterAddr" label="电表地址" min-width="120" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="gmtCreate" label="添加日期" min-width="120" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="remark" label="备注" min-width="220" show-overflow-tooltip></el-table-column>
       </el-table>
-      <div style="padding:8px 0;">
+      <div style="padding:8px 0;text-align:right;">
         <el-pagination
           background
           @size-change="handleSizeChange"
@@ -48,34 +56,46 @@
       :destroy-on-close="true"
       :visible.sync="addVisible"
       width="600px"
+      v-if="addVisible"
     >
-      <add></add>
+      <add v-on:addDialog="addDialog" ref="addSave"></add>
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="addVisible = false">取 消</el-button>
-        <el-button size="small" type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button size="small" type="primary" @click="tosave">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog
+      title="修改"
+      :close-on-click-modal="false"
+      :visible.sync="editVisible"
+      :destroy-on-close="true"
+      width="600px"
+      v-if="editVisible"
+      :append-to-body="true"
+    >
+      <edit
+        :id="multipleSelection.length>0?multipleSelection[0].id:null"
+        v-on:addDialog="editDialog"
+        ref="editSave"
+      ></edit>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="editVisible = false">取 消</el-button>
+        <el-button size="small" type="primary" @click="toUpdate">确 定</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 <script>
 import add from "./add";
+import edit from "./edit";
 export default {
+  inject: ["reload"],
   data() {
     return {
+      editVisible: false,
       addVisible: false,
       keyword: "",
-      tableData: [
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        }
-      ],
+      tableData: [],
       currentPage: 1,
       pageSize: 10,
       total: 100,
@@ -83,22 +103,103 @@ export default {
     };
   },
   methods: {
+    open() {
+      this.$confirm("确定删除吗?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.detele();
+        })
+        .catch(() => {});
+    },
+    detele() {
+      let qs = require("qs");
+      let data = qs.stringify({
+        meterId: this.multipleSelection[0].id
+      });
+      this.Axios(
+        {
+          url: "/meter/del",
+          type: "post",
+          params: data,
+          option: {
+            requestTarget: "p",
+            successMsg: "删除成功"
+          }
+        },
+        this
+      )
+        .then(result => {
+          if (result.data.code === 200) {
+            console.log(result);
+            this.getList();
+          }
+        })
+        .catch(err => {});
+    },
+    toUpdate() {
+      this.$refs.editSave.save();
+    },
+    tosave() {
+      this.$refs.addSave.save();
+    },
+    addDialog(pamars) {
+      this.addVisible = false;
+      this.reload();
+      // this.getList();
+    },
+    editDialog(pamars) {
+      this.editVisible = false;
+      this.reload();
+      // this.getList();
+    },
     handleSizeChange(val) {
       this.pageSize = val;
-      console.log(`每页 ${val} 条`);
+      this.getList();
     },
     handleCurrentChange(val) {
       this.currentPage = val;
-      console.log(`当前页: ${val}`);
+      this.getList();
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
-      console.log(val);
+    },
+    getList() {
+      this.Axios(
+        {
+          url: "/meter/getList",
+          type: "get",
+          params: {
+            page: this.currentPage,
+            size: this.pageSize,
+            keyword: this.keyword
+          },
+          option: {
+            requestTarget: "p",
+            enableMsg: false
+          }
+        },
+        this
+      )
+        .then(result => {
+          if (result.data.code === 200) {
+            this.tableData = result.data.data.content;
+            this.total = result.data.data.totalElement;
+            console.log(result);
+            this.multipleSelection = [];
+          }
+        })
+        .catch(err => {});
     }
   },
-  created() {},
+  created() {
+    this.getList();
+  },
   components: {
-    add
+    add,
+    edit
   }
 };
 </script>

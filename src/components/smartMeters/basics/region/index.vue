@@ -2,53 +2,46 @@
   <div class="organizationManage">
     <div class="content">
       <div class="left">
-        <h5 class="componet-name">企业名称</h5>
+        <h5 class="componet-name">区域名称</h5>
         <div style="float:right;">
-          <h5 class="classify">类别</h5>
-          <h5 class="remarks">备注</h5>
+          <!-- <h5 class="classify">类别</h5> -->
+          <!-- <h5 class="remarks">备注</h5> -->
         </div>
-        <el-tree
-          class="organization-tree"
-          :data="data"
-          default-expand-all
-          :props="defaultProps"
-          @node-click="handleNodeClick"
-        >
+        <el-tree class="organization-tree" :data="data" default-expand-all :props="defaultProps">
           <span class="custom-tree-node" slot-scope="{ node, data }">
             <span :title="data.name" class="listcontent">
               {{ data.name }}
               <span class="addCase" @click.stop>
                 <permission-button
-                  permCode="organize_lookup.organize_add"
+                  permCode
                   banType="disable"
                   type="text"
                   size="mini"
                   @click="toAdd(data)"
-                  :disabled="iszcr&&data.organizeType==='企业'"
                 >
                   <el-tooltip class="item" effect="dark" content="添加" placement="top">
                     <i style="font-size:16px" class="iconfont">&#xe62f;</i>
                   </el-tooltip>
                 </permission-button>
                 <permission-button
-                  permCode="organize_lookup.organize_edit"
+                  permCode
                   banType="disable"
                   type="text"
                   size="mini"
                   @click="() => toRevise(data.id)"
-                  v-if="data.organizeType!='企业'"
+                  v-if="data.parentCode!=0"
                 >
                   <el-tooltip class="item" effect="dark" content="修改" placement="top">
                     <i style="font-size:16px" class="iconfont">&#xe6b4;</i>
                   </el-tooltip>
                 </permission-button>
                 <permission-button
-                  permCode="organize_lookup.organize_delete"
+                  permCode
                   banType="disable"
                   type="text"
                   size="mini"
                   @click="() => warningdelete(data.id)"
-                  v-if="data.organizeType!='企业'"
+                  v-if="data.parentCode!=0"
                   style="color:#F56C6C"
                 >
                   <el-tooltip class="item" effect="dark" content="删除" placement="top">
@@ -57,34 +50,80 @@
                 </permission-button>
               </span>
             </span>
-            <span class="state">{{ data.organizeType }}</span>
-            <span class="organizeInfo" :title="data.organizeInfo">{{ data.organizeInfo }}</span>
           </span>
         </el-tree>
       </div>
     </div>
-    <el-dialog title="添加" :visible.sync="addShow" width="500px">
-      <add v-on:addHide="addHide" :nodedata="nodedata" :addShow="addShow"></add>
+    <el-dialog
+      :close-on-click-modal="false"
+      title="添加"
+      :visible.sync="addShow"
+      width="500px"
+      v-if="addShow"
+    >
+      <el-form :model="regionName" label-width="100px" ref="add">
+        <el-form-item
+          prop="name"
+          label="名称："
+          style="margin-bottom:20px;padding-top:20px;"
+          :rules="[{ required: true, message: '请输入名称', trigger: 'blur' }]"
+        >
+          <el-input
+            type="text"
+            size="small"
+            v-model="regionName.name"
+            style="width:300px;"
+            maxlength="20px;"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="addShow = false">取 消</el-button>
+        <el-button size="small" type="primary" @click="tosave">确 定</el-button>
+      </span>
     </el-dialog>
-    <el-dialog title="修改" :visible.sync="reviseShow" width="500px">
-      <revise v-show="reviseShow" v-on:reviseHide="reviseHide" :chengedata="chengedata"></revise>
+    <el-dialog
+      :close-on-click-modal="false"
+      title="修改"
+      :visible.sync="reviseShow"
+      width="500px"
+      v-if="reviseShow"
+    >
+      <el-form :model="chengedata" label-width="100px" ref="edit">
+        <el-form-item
+          prop="name"
+          label="名称："
+          style="margin-bottom:20px;padding-top:20px;"
+          :rules="[{ required: true, message: '请输入名称', trigger: 'blur' }]"
+        >
+          <el-input
+            type="text"
+            size="small"
+            v-model="chengedata.name"
+            style="width:300px;"
+            maxlength="20px;"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="small" @click="reviseShow = false">取 消</el-button>
+        <el-button size="small" type="primary" @click="toUpdate">确 定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
 <script>
-import add from "./Add";
-import revise from "./Revise";
+// import add from "./Add";
+// import revise from "./Revise";
 import { eq } from "semver";
 
 export default {
   inject: ["reload"],
   data() {
     return {
+      regionName: { name: "" },
       addShow: false,
       reviseShow: false,
-      name1: [1, 2, 3, 4, 5, 6, 7, 8],
-      organizeType: [1, 2, 3, 4, 5, 6, 7, 8],
-      organizeInfo: [1, 2, 3, 4, 5, 6, 7, 8],
       pushtext: [],
       code: "id",
       data: [],
@@ -97,40 +136,98 @@ export default {
       //xiugai jiedian
       chengedata: "",
       //当前节点ID
-      orgID: "",
-      iszcr: false
+      enterpriseId: JSON.parse(localStorage.getItem("user")).enterpriseId
     };
   },
   methods: {
-    reviseHide(params) {
-      this.reviseShow = params;
+    tosave() {
+      this.$refs["add"].validate(valid => {
+        if (valid) {
+          let qs = require("qs");
+          let data = qs.stringify({
+            parentCode: this.nodedata.code,
+            name: this.regionName.name,
+            enterpriseId: this.enterpriseId
+          });
+          this.Axios(
+            {
+              url: "/devicePosition/add",
+              params: data,
+              type: "post",
+              option: {
+                enableMsg: false
+              }
+            },
+            this
+          )
+            .then(result => {
+              if (result.data.code === 200) {
+                this.regionName.name = "";
+                this.addShow = false;
+                console.log(result);
+                this.$message.success("添加成功");
+                this.allOrganize();
+              }
+            })
+            .catch(err => {});
+        } else {
+          return false;
+        }
+      });
     },
     toRevise(id) {
       this.reviseShow = true;
       this.findOneOrganize(id);
     },
-    addHide(params) {
-      this.addShow = params;
-    },
     toAdd(data) {
+      console.log(data);
       this.nodedata = data;
       this.addShow = true;
       return false;
     },
-    handleNodeClick(data) {
-      this.nodedata = data;
-      this.chengedata = data;
+    toUpdate() {
+      this.$refs["edit"].validate(valid => {
+        if (valid) {
+          let qs = require("qs");
+          let data = qs.stringify({
+            id: this.chengedata.id,
+            name: this.chengedata.name
+          });
+          this.Axios(
+            {
+              url: "/devicePosition/update",
+              params: data,
+              type: "post",
+              option: {
+                enableMsg: false
+              }
+            },
+            this
+          )
+            .then(result => {
+              if (result.data.code === 200) {
+                this.reviseShow = false;
+                this.$message.success("修改成功");
+                this.allOrganize();
+              }
+            })
+            .catch(err => {});
+        } else {
+          return false;
+        }
+      });
     },
     orgdelete(nodeId) {
       //删除组织机构
       let qs = require("qs");
       let data = qs.stringify({
+        enterpriseId: this.enterpriseId,
         organizeId: nodeId
       });
       this.Axios(
         {
-          url: "/organize/delete/" + nodeId,
-          params: data,
+          url: "/devicePosition/del?id=" + nodeId,
+          params: {},
           type: "post",
           option: {
             enableMsg: false
@@ -140,9 +237,8 @@ export default {
       ).then(
         result => {
           if (result.data.code == 200) {
-            this.reload();
-          } else {
-            this.$message("删除失败");
+            this.$message.success("删除成功");
+            this.allOrganize();
           }
         },
         ({ type, info }) => {}
@@ -151,9 +247,11 @@ export default {
     allOrganize() {
       this.Axios(
         {
-          params: {},
+          params: {
+            enterpriseId: this.enterpriseId
+          },
           type: "get",
-          url: "/organize/allOrganize",
+          url: "/devicePosition/all",
           option: {
             enableMsg: false
           }
@@ -161,34 +259,17 @@ export default {
         this
       ).then(
         result => {
-          for (let i = 0; i < result.data.data.length; i++) {
-            if (result.data.data[i].organizeType === 0) {
-              result.data.data[i].organizeType = "企业";
-              result.data.data[i].name = "组织机构";
-            }
-            if (result.data.data[i].organizeType === 1) {
-              result.data.data[i].organizeType = "公司";
-            }
-            if (result.data.data[i].organizeType === 2) {
-              result.data.data[i].organizeType = "工厂";
-            }
-            if (result.data.data[i].organizeType === 3) {
-              result.data.data[i].organizeType = "部门";
-            }
-            if (result.data.data[i].organizeType === 4) {
-              result.data.data[i].organizeType = "车间";
-            }
-            if (result.data.data[i].organizeType === 5) {
-              result.data.data[i].organizeType = "产线";
-            }
+          if (result.data.code === 200) {
+            console.log(result);
+            let arr = Math.min.apply(
+              null,
+              result.data.data.map(item => {
+                return item.parentCode;
+              })
+            );
+            this.data = this.filterArray(result.data.data, arr);
+            console.log(this.data);
           }
-          let arr = Math.min.apply(
-            null,
-            result.data.data.map(item => {
-              return item.parentCode;
-            })
-          );
-          this.data = this.filterArray(result.data.data, arr);
         },
         ({ type, info }) => {}
       );
@@ -199,7 +280,7 @@ export default {
         {
           params: id,
           type: "get",
-          url: "/organize/findOneOrganize/" + id,
+          url: "/devicePosition/findOne?id=" + id,
           option: {
             enableMsg: false
           }
@@ -207,7 +288,10 @@ export default {
         this
       )
         .then(result => {
-          this.chengedata = result.data.data;
+          if (result.data.code === 200) {
+            console.log(result);
+            this.chengedata = result.data.data;
+          }
         })
         .catch(err => {});
     },
@@ -227,31 +311,16 @@ export default {
       }
       return tree;
     },
-    ap() {
-      this.add1 = !this.add1;
-    },
-    revise() {
-      this.revise1 = !this.revise1;
-    },
     warningdelete(nodeId) {
-      this.$confirm(
-        "该操作将会删除(如设备、员工、计划等)数据，确认删除吗？",
-        "警告",
-        {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        }
-      )
+      this.$confirm("确定删除吗？", "警告", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
         .then(() => {
           this.orgdelete(nodeId);
         })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除"
-          });
-        });
+        .catch(() => {});
     }
   },
   mounted() {
@@ -268,14 +337,13 @@ export default {
       };
     }
     let a = JSON.parse(localStorage.getItem("user"));
-    this.iszcr = a.position !== "注册人";
   },
   created() {
     this.allOrganize();
   },
   components: {
-    revise,
-    add
+    // revise,
+    // add
   }
 };
 </script>

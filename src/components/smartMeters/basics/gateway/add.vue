@@ -1,16 +1,28 @@
 <template>
   <div class="gateway_add">
-    <el-form label-width="110px">
-      <el-form-item label="网关编码：" prop="no">
+    <el-form :model="gatewayDTO" ref="gatewayAdd" label-width="110px">
+      <el-form-item
+        label="网关编码："
+        prop="no"
+        :rules="[{ required: true, message: '请输入网关编码', trigger: 'blur' }]"
+      >
         <el-input size="small" v-model="gatewayDTO.no" style="width:300px;" maxlength="20"></el-input>
       </el-form-item>
-      <el-form-item label="网关名称：" prop="name">
+      <el-form-item
+        label="网关名称："
+        prop="name"
+        :rules="[{ required: true, message: '请输入网关名称', trigger: 'blur' }]"
+      >
         <el-input size="small" v-model="gatewayDTO.name" style="width:300px;" maxlength="20"></el-input>
       </el-form-item>
       <el-form-item label="型号：" prop="type">
         <el-input size="small" v-model="gatewayDTO.type" style="width:300px;" maxlength="20"></el-input>
       </el-form-item>
-      <el-form-item label="传输协议：" prop="transProto">
+      <el-form-item
+        label="传输协议："
+        prop="transProto"
+        :rules="[{ required: true, message: '请选择传输协议', trigger: 'blur' }]"
+      >
         <el-select
           filterable
           v-model="gatewayDTO.transProto"
@@ -24,7 +36,7 @@
           <el-option label="HTTP/HTTPS" :value="4"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="端口号：" prop="port">
+      <el-form-item label="端口：" prop="port">
         <el-input
           size="small"
           v-model="gatewayDTO.port"
@@ -33,7 +45,11 @@
           placeholder="1~65535"
         ></el-input>
       </el-form-item>
-      <el-form-item label="网路类型：" prop="netType">
+      <el-form-item
+        label="网路类型："
+        prop="netType"
+        :rules="[{ required: true, message: '请选择网路类型', trigger: 'blur' }]"
+      >
         <el-select
           filterable
           v-model="gatewayDTO.netType"
@@ -107,25 +123,31 @@ export default {
         .catch(err => {});
     },
     save() {
-      this.Axios(
-        {
-          url: "/gateway/add/",
-          type: "post",
-          params: this.gatewayDTO,
-          option: {
-            requestTarget: "p",
-            enableMsg: false
-          }
-        },
-        this
-      )
-        .then(result => {
-          if (result.data.code === 200) {
-            console.log(result);
-            this.$emit("addDialog", false);
-          }
-        })
-        .catch(err => {});
+      this.$refs["gatewayAdd"].validate(valid => {
+        if (valid) {
+          this.Axios(
+            {
+              url: "/gateway/add/",
+              type: "post",
+              params: this.gatewayDTO,
+              option: {
+                requestTarget: "p",
+                enableMsg: false
+              }
+            },
+            this
+          )
+            .then(result => {
+              if (result.data.code === 200) {
+                console.log(result);
+                this.$emit("addDialog", false);
+              }
+            })
+            .catch(err => {});
+        } else {
+          return false;
+        }
+      });
     }
   },
   created() {

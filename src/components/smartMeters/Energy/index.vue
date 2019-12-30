@@ -9,27 +9,29 @@
           </span>
           <span>
             统计区域：
-            <el-select size="mini" v-model="value" style="width:80px;" placeholder="请选择">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
+            <el-cascader
+              filterable
+              :show-all-levels="false"
+              size="mini"
+              v-model="value"
+              :options="options"
+              :props="{ expandTrigger: 'hover',label:'name',value:'id',checkStrictly: true }"
+              @change="handleChange"
+              style="width:80px;"
+            ></el-cascader>
           </span>
         </el-col>
         <el-col :span="24">
           <span>
             <i class="iconfontz" style="color:#349DFF;font-size:16px;">&#xe603;</i>
           </span>
-          <span>电表数量：</span>
+          <span>电表数量：{{sumMsg.num}}</span>
         </el-col>
         <el-col :span="24">
           <span>
             <i class="iconfontz" style="color:#349DFF;font-size:16px;">&#xe81a;</i>
           </span>
-          <span>采集异常数量：</span>
+          <span>采集异常数量：{{sumMsg.errorNum}}</span>
         </el-col>
       </li>
       <li>
@@ -38,16 +40,26 @@
           <i class="iconfontz" style="color:#349DFF;font-size:80px;">&#xe63b;</i>
         </el-col>
         <el-col :span="12" style="padding-top:24px;">
-          <span style="font-size:36px;padding-left:20px;">3211</span>
+          <span style="font-size:36px;padding-left:20px;">{{topMsg[0]!=null?topMsg[0].dayEnergy:0}}</span>
           <span>kWh</span>
         </el-col>
         <el-col :span="6" style="padding-top:24px;">
           <span>昨日同比</span>
           <br />
           <br />
-          <span style="color:#FF9900;">
-            0.9%
-            <i class="iconfontz" style="font-size:14px;">&#xe64b;</i>
+          <span style="color:#FF9900;" v-if="topMsg[0]!=null?topMsg[0].type==1:false">
+            {{topMsg[0]!=null?topMsg[0].dayRate:0}}
+            <i
+              class="iconfontz"
+              style="font-size:14px;"
+            >&#xe64b;</i>
+          </span>
+          <span style="color:#00CC20;" v-if="topMsg[0]!=null?topMsg[0].type==0:false">
+            {{topMsg[0]!=null?topMsg[0].dayRate:0}}
+            <i
+              class="iconfontz"
+              style="font-size:14px;"
+            >&#xe601;</i>
           </span>
         </el-col>
       </li>
@@ -57,16 +69,28 @@
           <i class="iconfontz" style="color:#349DFF;font-size:72px;">&#xe600;</i>
         </el-col>
         <el-col :span="12" style="padding-top:24px;">
-          <span style="font-size:36px;padding-left:20px;">3211</span>
+          <span
+            style="font-size:36px;padding-left:20px;"
+          >{{topMsg[1]!=null?topMsg[1].monthEnergy:0}}</span>
           <span>kWh</span>
         </el-col>
         <el-col :span="6" style="padding-top:24px;">
           <span>上月同比</span>
           <br />
           <br />
-          <span style="color:#00CC20;">
-            -12.9%
-            <i class="iconfontz" style="font-size:14px;">&#xe601;</i>
+          <span style="color:#FF9900;" v-if="topMsg[1]!=null?topMsg[1].type==1:false">
+            {{topMsg[1]!=null?topMsg[1].monthRate:0}}
+            <i
+              class="iconfontz"
+              style="font-size:14px;"
+            >&#xe64b;</i>
+          </span>
+          <span style="color:#00CC20;" v-if="topMsg[1]!=null?topMsg[1].type==0:false">
+            {{topMsg[1]!=null?topMsg[1].monthRate:0}}
+            <i
+              class="iconfontz"
+              style="font-size:14px;"
+            >&#xe601;</i>
           </span>
         </el-col>
       </li>
@@ -76,7 +100,7 @@
           <i class="iconfontz" style="color:#349DFF;font-size:72px;">&#xe60b;</i>
         </el-col>
         <el-col :span="18" style="padding-top:24px;">
-          <span style="font-size:36px;padding-left:20px;">3211</span>
+          <span style="font-size:36px;padding-left:20px;">{{topMsg[2]!=null?topMsg[2].yearEnergy:0}}</span>
           <span>kWh</span>
         </el-col>
       </li>
@@ -97,33 +121,30 @@ var echarts = require("echarts");
 export default {
   data() {
     return {
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕"
-        },
-        {
-          value: "选项2",
-          label: "双皮奶"
-        },
-        {
-          value: "选项3",
-          label: "蚵仔煎"
-        },
-        {
-          value: "选项4",
-          label: "龙须面"
-        },
-        {
-          value: "选项5",
-          label: "北京烤鸭"
-        }
+      options: [],
+      value: [],
+      enterpriseId: JSON.parse(localStorage.getItem("user")).enterpriseId,
+      areaId: "",
+      topMsg: [
+        { dayEnergy: "", dayRate: "", type: "" },
+        { monthEnergy: "", monthRate: "", type: "" },
+        { yearEnergy: "" }
       ],
-      value: ""
+      todayMsg: [],
+      sevenDayMsg: [],
+      yearMsg: [],
+      topTenMsg: [],
+      classifyMsg: [],
+      sumMsg: {}
     };
   },
   methods: {
-    today() {
+    handleChange(value) {
+      this.areaId = value[value.length - 1];
+      this.getAllMsg();
+      // console.log(this.areaId);
+    },
+    today(value) {
       const chartToday = echarts.init(document.getElementById("today"));
       chartToday.setOption({
         title: {
@@ -142,9 +163,9 @@ export default {
           }
         },
         toolbox: {
-          feature: {
-            saveAsImage: {}
-          }
+          // feature: {
+          //   saveAsImage: {}
+          // }
         },
         grid: {
           left: "3%",
@@ -156,7 +177,7 @@ export default {
           {
             type: "category",
             boundaryGap: false,
-            data: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+            data: value.map(item => item.hour)
           }
         ],
         yAxis: [
@@ -167,11 +188,22 @@ export default {
         ],
         series: [
           {
-            name: "邮件营销",
+            name: "用电量",
             type: "line",
             smooth: true,
-            // areaStyle: {},
-            data: [120, 132, 101, 134, 90, 230, 210],
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                {
+                  offset: 0,
+                  color: "rgb(24, 144, 255)"
+                },
+                {
+                  offset: 1,
+                  color: "rgb(255, 255, 255)"
+                }
+              ])
+            },
+            data: value.map(item => item.energy),
             itemStyle: {
               color: "#0A82C8"
             }
@@ -182,7 +214,7 @@ export default {
         chartToday.resize();
       });
     },
-    seven() {
+    seven(value) {
       const chartSeven = echarts.init(document.getElementById("seven"));
       chartSeven.setOption({
         title: {
@@ -201,9 +233,9 @@ export default {
           }
         },
         toolbox: {
-          feature: {
-            saveAsImage: {}
-          }
+          // feature: {
+          //   saveAsImage: {}
+          // }
         },
         grid: {
           left: "3%",
@@ -215,7 +247,7 @@ export default {
           {
             type: "category",
             boundaryGap: false,
-            data: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+            data: value.map(item => item.date)
           }
         ],
         yAxis: [
@@ -226,11 +258,22 @@ export default {
         ],
         series: [
           {
-            name: "邮件营销",
+            name: "用电量",
             type: "line",
             smooth: true,
-            // areaStyle: {},
-            data: [120, 132, 101, 134, 90, 230, 210],
+            // areaStyle: {
+            //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            //     {
+            //       offset: 0,
+            //       color: "rgb(24, 144, 255)"
+            //     },
+            //     {
+            //       offset: 1,
+            //       color: "rgb(255, 255, 255)"
+            //     }
+            //   ])
+            // },
+            data: value.map(item => item.energy),
             itemStyle: {
               color: "#0A82C8"
             }
@@ -241,7 +284,7 @@ export default {
         chartSeven.resize();
       });
     },
-    year() {
+    year(value) {
       const chartYear = echarts.init(document.getElementById("year"));
       chartYear.setOption({
         title: {
@@ -267,7 +310,7 @@ export default {
         xAxis: [
           {
             type: "category",
-            data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            data: value.map(item => item.date),
             axisTick: {
               alignWithLabel: true
             }
@@ -275,15 +318,16 @@ export default {
         ],
         yAxis: [
           {
-            type: "value"
+            type: "value",
+            name: "kWh"
           }
         ],
         series: [
           {
-            name: "直接访问",
+            name: "用电量",
             type: "bar",
             barWidth: "60%",
-            data: [10, 52, 200, 334, 390, 330, 220]
+            data: value.map(item => item.energy)
           }
         ]
       });
@@ -291,14 +335,14 @@ export default {
         chartYear.resize();
       });
     },
-    equipmentClassfy() {
+    equipmentClassfy(value) {
       const chartEquipmentClassfy = echarts.init(
         document.getElementById("equipment_classfy"),
         "light"
       );
       chartEquipmentClassfy.setOption({
         title: {
-          text: "按设备类别占比分析 TOP 5",
+          text: "按设备类别占比分析 TOP 10",
           x: "left",
           textStyle: {
             fontSize: 14
@@ -312,16 +356,7 @@ export default {
           orient: "vertical",
           x: "left",
           y: "center",
-          data: [
-            "rose1",
-            "rose2",
-            "rose3",
-            "rose4",
-            "rose5",
-            "rose6",
-            "rose7",
-            "rose8"
-          ]
+          data: value.map(item => item.deviceName)
         },
         toolbox: {
           show: true
@@ -329,7 +364,7 @@ export default {
         calculable: true,
         series: [
           {
-            name: "半径模式",
+            name: "设备类别耗电占比",
             type: "pie",
             radius: [20, 110],
             center: ["50%", "50%"],
@@ -350,16 +385,12 @@ export default {
                 show: true
               }
             },
-            data: [
-              { value: 10, name: "rose1" },
-              { value: 5, name: "rose2" },
-              { value: 15, name: "rose3" },
-              { value: 25, name: "rose4" },
-              { value: 20, name: "rose5" },
-              { value: 35, name: "rose6" },
-              { value: 30, name: "rose7" },
-              { value: 40, name: "rose8" }
-            ]
+            data: value.map(item => {
+              return {
+                value: item.total,
+                name: item.deviceName
+              };
+            })
           }
         ]
       });
@@ -367,7 +398,8 @@ export default {
         chartEquipmentClassfy.resize();
       });
     },
-    EquipmentComparison() {
+    EquipmentComparison(value) {
+      console.log(value[1]);
       const chartEquipmentComparison = echarts.init(
         document.getElementById("Equipment_comparison"),
         "light"
@@ -383,7 +415,7 @@ export default {
           trigger: "axis"
         },
         legend: {
-          data: ["邮件营销", "联盟广告", "视频广告", "直接访问", "搜索引擎"]
+          data: value.length > 0 ? value[1].value.map(item => item.name) : []
         },
         grid: {
           left: "3%",
@@ -392,64 +424,185 @@ export default {
           containLabel: true
         },
         toolbox: {
-          feature: {
-            saveAsImage: {}
-          }
+          // feature: {
+          //   saveAsImage: {}
+          // }
         },
         xAxis: {
           type: "category",
           boundaryGap: false,
-          data: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+          data: value.length > 0 ? value[0].date : []
         },
         yAxis: {
-          type: "value"
+          type: "value",
+          name: "kWh"
         },
-        series: [
-          {
-            name: "邮件营销",
-            type: "line",
-            stack: "总量",
-            data: [120, 132, 101, 134, 90, 230, 210]
-          },
-          {
-            name: "联盟广告",
-            type: "line",
-            stack: "总量",
-            data: [220, 182, 191, 234, 290, 330, 310]
-          },
-          {
-            name: "视频广告",
-            type: "line",
-            stack: "总量",
-            data: [150, 232, 201, 154, 190, 330, 410]
-          },
-          {
-            name: "直接访问",
-            type: "line",
-            stack: "总量",
-            data: [320, 332, 301, 334, 390, 330, 320]
-          },
-          {
-            name: "搜索引擎",
-            type: "line",
-            stack: "总量",
-            data: [820, 932, 901, 934, 1290, 1330, 1320]
-          }
-        ]
+        series:
+          value.length > 0
+            ? value[1].value
+            : [{ name: "", data: [], type: "line" }]
       });
       window.addEventListener("resize", () => {
         chartEquipmentComparison.resize();
       });
+    },
+    allOrganize() {
+      this.Axios(
+        {
+          params: {
+            enterpriseId: this.enterpriseId
+          },
+          type: "get",
+          url: "/devicePosition/all",
+          option: {
+            enableMsg: false
+          }
+        },
+        this
+      ).then(
+        result => {
+          if (result.data.code === 200) {
+            // console.log(result);
+            let arr = Math.min.apply(
+              null,
+              result.data.data.map(item => {
+                return item.parentCode;
+              })
+            );
+            this.options = this.filterArray(result.data.data, arr);
+            this.areaId = this.options[0].id;
+            this.value.push(this.areaId);
+            this.getAllMsg();
+          }
+        },
+        ({ type, info }) => {}
+      );
+    },
+    filterArray(data, parent) {
+      let vm = this;
+      var tree = [];
+      var temp;
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].parentCode == parent) {
+          var obj = data[i];
+          temp = this.filterArray(data, data[i].code);
+          if (temp.length > 0) {
+            obj.children = temp;
+          }
+          tree.push(obj);
+        }
+      }
+      return tree;
+    },
+    getAllMsg() {
+      this.Axios(
+        {
+          params: {
+            areaId: this.areaId
+          },
+          type: "get",
+          url: [
+            "/energy/area/total",
+            "/energy/area/today/everyHour",
+            "/energy/area/7days/everyDay",
+            "/energy/area/year/everyMonth",
+            "/energy/area/30day/top10",
+            "/energy/area/month/type",
+            "/meter/getMeterNum"
+          ],
+          option: {
+            requestTarget: "p",
+            enableMsg: false
+          }
+        },
+        this
+      ).then(
+        result => {
+          // console.log(result);
+          if (result[0].data.code === 200) {
+            this.topMsg = result[0].data.data;
+            if (
+              result[0].data.data[0] != null &&
+              result[0].data.data[1] != null &&
+              result[0].data.data[2] != null
+            ) {
+              if (this.topMsg[0].dayRate.indexOf("-") != -1) {
+                this.topMsg[0].type = 0;
+              } else {
+                this.topMsg[0].type = 1;
+              }
+              if (this.topMsg[1].monthRate.indexOf("-") != -1) {
+                this.topMsg[1].type = 0;
+              } else {
+                this.topMsg[1].type = 1;
+              }
+            }
+          }
+          if (result[1].data.code === 200) {
+            this.todayMsg = result[1].data.data;
+            if (this.todayMsg != null) {
+              this.today(this.todayMsg);
+            } else {
+              this.today([]);
+            }
+          }
+          if (result[2].data.code === 200) {
+            this.sevenDayMsg = result[2].data.data;
+            if (this.sevenDayMsg != null) {
+              this.seven(this.sevenDayMsg);
+            } else {
+              this.seven([]);
+            }
+          }
+          if (result[3].data.code === 200) {
+            this.yearMsg = result[3].data.data;
+            if (this.yearMsg != null) {
+              this.year(this.yearMsg);
+            } else {
+              this.year([]);
+            }
+          }
+          if (result[4].data.code === 200) {
+            this.topTenMsg = result[4].data.data;
+            if (this.topTenMsg != null) {
+              this.equipmentClassfy(this.topTenMsg);
+            } else {
+              this.equipmentClassfy([]);
+            }
+          }
+          if (result[5].data.code === 200) {
+            this.classifyMsg = result[5].data.data;
+            if (this.classifyMsg != null) {
+              this.classifyMsg[1].value = this.classifyMsg[1].value.map(
+                item => {
+                  return {
+                    name: item.type,
+                    type: "line",
+                    stack: "总量",
+                    data: item.energy
+                  };
+                }
+              );
+              this.EquipmentComparison(this.classifyMsg);
+            } else {
+              this.EquipmentComparison([]);
+            }
+
+            // console.log(this.classifyMsg);
+            // console.log(this.classifyMsg.map(item => item.date));
+          }
+          if (result[6].data.code === 200) {
+            this.sumMsg = result[6].data.data;
+          }
+        },
+        ({ type, info }) => {}
+      );
     }
   },
-  created() {},
-  mounted() {
-    this.today();
-    this.seven();
-    this.year();
-    this.equipmentClassfy();
-    this.EquipmentComparison();
-  }
+  created() {
+    this.allOrganize();
+  },
+  mounted() {}
 };
 </script>
 <style lang="less">

@@ -19,18 +19,31 @@ export default [{
   icon: '&#xe600;',
   subMenu: [
     {
-      menu: '概况',
+      menu: '总览',
       route: '/generalSituation',
       permissionCode: 'Home'
     },
     {
-      menu: '区域能耗分析',
+      menu: '明细分析',
       route: '/EnergyDetails',
+      permissionCode: 'Home'
+    }
+  ]
+},
+{
+  menu: 'OEE',
+  permissionCode: 'oee',
+  defaultDock: true,
+  icon: '&#xe600;',
+  subMenu: [
+    {
+      menu: '总览',
+      route: '/efficiency',
       permissionCode: 'Home'
     },
     {
-      menu: '分类能耗分析',
-      route: '/classfyDetails',
+      menu: '明细分析',
+      route: '/efficiencyDetails',
       permissionCode: 'Home'
     }
   ]
